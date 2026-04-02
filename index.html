@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광운인공지능고 결석신고서 생성기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root { --main-border: 1px solid #000; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; }
+        .no-print-area { max-width: 800px; margin: 0 auto 20px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* A4 양식 스타일 */
+        #report-page { 
+            width: 210mm; min-height: 297mm; padding: 20mm; margin: 0 auto; 
+            background: white; border: 1px solid #ddd; box-sizing: border-box;
+            position: relative; line-height: 1.6;
+        }
+        .title { text-align: center; font-size: 24px; font-weight: bold; text-decoration: underline; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: var(--main-border); padding: 8px; text-align: center; font-size: 14px; }
+        .left { text-align: left; }
+        .sign-area { margin-top: 50px; text-align: right; }
+        .footer { position: absolute; bottom: 30mm; left: 0; right: 0; text-align: center; font-size: 18px; font-weight: bold; }
+        
+        input, select, textarea { width: 95%; border: 1px solid #ccc; padding: 5px; }
+        button { background: #0047a0; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        button:hover { background: #003580; }
+    </style>
+</head>
+<body>
+
+<div class="no-print-area">
+    <h3>📝 결석 신고서 정보 입력</h3>
+    <p>아래 정보를 입력하면 하단 양식에 실시간으로 반영됩니다.</p>
+    <div style="display: grid; grid-template-columns: 1 white 1fr; gap: 10px;">
+        <input type="text" id="input_name" placeholder="성명" oninput="sync()">
+        <input type="number" id="input_grade" placeholder="학년" oninput="sync()">
+        <input type="number" id="input_class" placeholder="반" oninput="sync()">
+        <input type="number" id="input_num" placeholder="번" oninput="sync()">
+    </div>
+    <br>
+    <button onclick="downloadPDF()">PDF 다운로드</button>
+</div>
+
+<div id="report-page">
+    <div class="title">결석(지각·조퇴·결과)신고서</div> [cite: 1]
+    
+    <table>
+        <tr>
+            <th width="15%">성명</th>
+            <td width="35%"><span id="view_name"></span></td>
+            <th width="15%">학급</th>
+            <td width="35%"><span id="view_grade"></span>학년 <span id="view_class"></span>반 <span id="view_num"></span>번</td> [cite: 3, 4, 5]
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th rowspan="2" width="15%">종류 [cite: 2]</th>
+            <td>질병 [cite: 6]</td><td>출석인정 [cite: 7]</td><td>기타 [cite: 8]</td>
+        </tr>
+        <tr>
+            <td>□</td><td>□</td><td>□</td>
+        </tr>
+    </table>
+
+    <div class="left" style="font-size: 12px; border: 1px solid #000; padding: 10px; margin-bottom: 15px;">
+        <strong>※ 출석 인정 종류 (해당 시 체크)</strong> [cite: 10]<br>
+        1) 조사 □ [cite: 11]  2) 학생 행사참여 □ [cite: 15]  3) 대회 참여 □ [cite: 20]  
+        4) 체험학습 □ [cite: 24]  5) 자격증 시험 □ [cite: 25]  6) 면접 □ [cite: 27]
+    </div>
+
+    <table>
+        <tr>
+            <th width="15%">기간 [cite: 31]</th>
+            <td class="left">2026년 ____월 ____일부터 ____월 ____일까지 ( ____ )일간</td> [cite: 32, 33, 34, 35, 39]
+        </tr>
+        <tr>
+            <th width="15%">사유 [cite: 36]</th>
+            <td class="left" height="100">위 본인은 ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )의 사유로 인하여 신고합니다.</td> [cite: 38, 40]
+        </tr>
+    </table>
+
+    <div class="left" style="font-size: 11px;">
+        ◎ 첨부서류: 의사소견서, 진료확인서, 체험학습 신청서 등 [cite: 41, 42]<br>
+        ※ 질병 결석 3일 이상일 경우 증빙 서류 필수 제출 [cite: 43, 44]
+    </div>
+
+    <div class="sign-area">
+        2026년 &nbsp;&nbsp;&nbsp; 월 &nbsp;&nbsp;&nbsp; 일 [cite: 46, 47]<br><br>
+        학 생 : ________________ (인) [cite: 48, 49]<br>
+        담임교사 : ________________ (인) [cite: 50, 51]
+    </div>
+
+    <div class="footer">광운인공지능고등학교장 귀하</div> 
+</div>
+
+<script>
+    // 입력값 실시간 동기화
+    function sync() {
+        document.getElementById('view_name').innerText = document.getElementById('input_name').value;
+        document.getElementById('view_grade').innerText = document.getElementById('input_grade').value;
+        document.getElementById('view_class').innerText = document.getElementById('input_class').value;
+        document.getElementById('view_num').innerText = document.getElementById('input_num').value;
+    }
+
+    // PDF 다운로드 실행
+    function downloadPDF() {
+        const element = document.getElementById('report-page');
+        const opt = {
+            margin: 0,
+            filename: '결석신고서_광운인공지능고.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 3 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+</body>
+</html>
