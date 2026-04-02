@@ -33,7 +33,6 @@
         label { font-size: 11px; color: #555; font-weight: bold; margin-bottom: 3px; display: block; }
         input, select, textarea { width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 12.5px; }
         
-        /* [수정] 왼쪽 입력기 담임 의견란 세로 크기 확대 */
         #in_opinion { min-height: 120px; resize: vertical; line-height: 1.5; }
 
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-top: 5px; background: #fafafa; padding: 8px; border-radius: 5px; }
@@ -45,7 +44,6 @@
         .btn-reset { background: #666; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 6px; font-size: 15px; font-weight: bold; flex: 1; }
         .disabled-area { opacity: 0.4; pointer-events: none; }
 
-        /* [PDF/미리보기 문서 스타일] */
         #form-capture { 
             width: 210mm; 
             height: 295mm; 
@@ -59,7 +57,6 @@
         .content-inner { padding: 0 20mm 10mm 20mm; display: flex; flex-direction: column; }
         .title { text-align: center; font-size: 24pt; font-weight: bold; margin-bottom: 15px; }
         
-        /* [수정] 최상단 종류 지시 문구 스타일 */
         .type-instruction { font-size: 11pt; margin-bottom: 5px; text-align: left; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 15px; }
@@ -151,7 +148,7 @@
         </div>
 
         <div class="full-row" style="margin-top:5px;">
-            <label>첨부 서류 제출 (미선택 시 '없음' 표시)</label>
+            <label>첨부 서류 제출</label>
             <div class="grid-container">
                 <div class="item-row"><input type="checkbox" class="in_attach" value="의사소견서" onchange="update()"> 의사소견서</div>
                 <div class="item-row"><input type="checkbox" class="in_attach" value="진료확인서" onchange="update()"> 진료확인서</div>
@@ -167,7 +164,7 @@
         </div>
 
         <div class="full-row" style="margin-top:5px;"><label>상세 사유</label><input type="text" id="in_reason" oninput="update(); updateOpinionOnly();"></div>
-        <div class="full-row" style="margin-top:5px;"><label>담임 의견 (자동 생성 후 수정 가능)</label><textarea id="in_opinion" rows="5" oninput="update()"></textarea></div>
+        <div class="full-row" style="margin-top:5px;"><label>담임 의견</label><textarea id="in_opinion" rows="5" oninput="update()"></textarea></div>
 
         <div class="btn-group">
             <button class="btn-reset" onclick="resetForm()">초기화</button>
@@ -181,14 +178,11 @@
         <div class="pdf-header-spacer"></div>
         <div class="content-inner">
             <div class="title">결석(지각·조퇴·결과)신고서</div>
-            
             <div class="type-instruction">1. 종류: 해당 칸에 V하세요.</div>
-
             <table>
-                <tr><th style="width:20%;">과</th><td style="width:30%;"><span id="out_dept"></span></td><th style="width:20%;">학년 - 반</th><td style="width:30%;"><span id="out_g"></span>학년 <span id="out_c"></span>반</td></tr>
+                <tr><th style="width:20%;">학과</th><td style="width:30%;"><span id="out_dept"></span></td><th style="width:20%;">학년 - 반</th><td style="width:30%;"><span id="out_g"></span>학년 <span id="out_c"></span>반</td></tr>
                 <tr><th>번호</th><td><span id="out_n"></span>번</td><th>성명</th><td><span id="out_name"></span></td></tr>
             </table>
-
             <table class="type-matrix">
                 <tr><th style="width:20%;">구분</th><th style="width:26.6%;">질병</th><th style="width:26.6%;">출석 인정</th><th style="width:26.6%;">기타</th></tr>
                 <tr><th>결석</th><td id="m_질병_결석"></td><td id="m_출석인정_결석"></td><td id="m_기타_결석"></td></tr>
@@ -205,32 +199,20 @@
                     <span id="s7">□</span> 기타 : ( <span id="s7_txt"></span> )
                 </div>
             </div>
-
             <table>
                 <tr><th style="width:20%;">2. 기간</th><td style="text-align:left; padding-left:15px;">2026년 <span id="out_sy"></span>월 <span id="out_sd"></span>일부터 <span id="out_ey"></span>월 <span id="out_ed"></span>일까지 (<span id="out_days"></span>)일간</td></tr>
             </table>
-
             <table class="reason-table">
-                <tr>
-                    <th style="width:20%;">3. 사유</th>
-                    <td>
-                        위 본인은 ( <strong id="out_reason"></strong> )의 사유로 인하여<br>
-                        ( <strong id="out_type"></strong> )하였으므로 이에 신고합니다.
-                    </td>
-                </tr>
+                <tr><th style="width:20%;">3. 사유</th><td>위 본인은 ( <strong id="out_reason"></strong> )의 사유로 인하여<br>( <strong id="out_type"></strong> )하였으므로 이에 신고합니다.</td></tr>
             </table>
-
             <div class="attachment-area">◎ 첨부서류: <span id="out_attach" style="font-weight:bold;"></span></div>
-            
             <div style="font-size:10pt; margin-bottom:3px;">◎ 담임교사 의견란</div>
             <div class="opinion-box"><span id="out_opinion"></span></div>
-
             <div class="sign-area">
                 2026년 &nbsp;<span id="out_sub_m"></span>&nbsp; 월 &nbsp;<span id="out_sub_d"></span>&nbsp; 일<br>
                 학 생 : <span id="out_name_sign"></span> (인)<br>
                 담임교사 : <span id="out_teacher_sign"></span> (인)
             </div>
-            
             <div class="school-name">광운인공지능고등학교장 귀하</div>
         </div>
     </div>
@@ -300,7 +282,6 @@
             const etcVal = document.getElementById('in_attach_etc').value;
             attachList.push(etcVal ? etcVal : "기타");
         }
-        
         document.getElementById('out_attach').innerText = attachList.length > 0 ? attachList.join(', ') : "없음";
 
         const dset = (id, outM, outD) => {
@@ -344,9 +325,12 @@
 
     function generatePDF() {
         const element = document.getElementById('form-capture');
+        const name = document.getElementById('in_name').value || '미입력';
+        const startDate = document.getElementById('in_sdate').value || '날짜미입력'; // [수정] 결석 시작일 사용
+        
         const opt = { 
             margin: 0, 
-            filename: `결석신고서_${document.getElementById('in_name').value || '미입력'}.pdf`, 
+            filename: `결석신고서_${name}_${startDate}.pdf`, 
             html2canvas: { scale: 3, useCORS: true }, 
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: 'avoid-all' } 
