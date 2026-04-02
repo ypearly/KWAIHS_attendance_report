@@ -2,72 +2,374 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>2026학년도 광운인공지능고 결석신고서</title>
+    <title>2026학년도 광운인공지능고 결석신고서 생성기</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #eaeff2; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .input-panel { width: 800px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .input-panel { width: 900px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .grid-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
+        .full-row { grid-column: span 4; }
         
-        /* A4 정밀 레이아웃 */
         #form-capture { 
-            width: 210mm; height: 297mm; padding: 20mm; background: white;
-            box-sizing: border-box; position: relative; color: #000; border: 1px solid #ccc;
+            width: 210mm; height: 297mm; padding: 15mm 18mm; background: white;
+            box-sizing: border-box; position: relative; color: #000; border: 1px solid #eee;
         }
-        .title { text-align: center; font-size: 24pt; font-weight: bold; margin-bottom: 30px; text-decoration: underline; letter-spacing: 2px; }
-        .sub-title { text-align: left; font-size: 11pt; font-weight: bold; margin-bottom: 5px; }
+        .title { text-align: center; font-size: 24pt; font-weight: bold; margin-bottom: 40px; }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 0px; table-layout: fixed; }
-        th, td { border: 1px solid black; height: 38px; text-align: center; font-size: 11pt; overflow: hidden; }
-        th { background-color: #f9f9f9; font-weight: normal; }
+        th, td { border: 1px solid black; height: 32px; text-align: center; font-size: 11pt; }
+        th { background-color: #fcfcfc; font-weight: normal; }
         
-        .check-box-area { border: 1px solid black; border-top: none; padding: 10px; font-size: 9.5pt; line-height: 1.8; margin-bottom: 15px; text-align: left; }
-        .reason-box { height: 120px; vertical-align: top; text-align: left; padding: 10px; font-size: 11pt; }
+        .type-matrix th { height: 26px; font-size: 10pt; }
+        .type-matrix td { height: 30px; font-size: 14pt; font-weight: bold; }
+
+        .check-box-area { border: 1px solid black; border-top: none; padding: 10px 12px; font-size: 10pt; line-height: 1.8; margin-bottom: 10px; text-align: left; }
+        .ack-line-1 { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; font-size: 9.5pt; }
+        .ack-line-2 { display: flex; align-items: center; width: 100%; border-top: 1px dashed #eee; padding-top: 5px; }
+        .ack-item { white-space: nowrap; }
+
+        .reason-box { height: 80px; vertical-align: middle; text-align: left; padding: 10px 15px; font-size: 11pt; line-height: 1.6; }
+        .opinion-box { border: 1px solid black; margin-top: 8px; height: 70px; padding: 10px; font-size: 10.5pt; text-align: left; }
+        .school-name { position: absolute; bottom: 20mm; left: 0; right: 0; text-align: center; font-size: 20pt; font-weight: bold; }
         
-        .sign-area { margin-top: 60px; text-align: right; font-size: 12pt; line-height: 2.2; padding-right: 10px; }
-        .school-name { position: absolute; bottom: 35mm; left: 0; right: 0; text-align: center; font-size: 20pt; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .docs-grid, .ack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; background: #fafafa; padding: 10px; border-radius: 5px; }
+        .item-row { display: flex; align-items: center; font-size: 13px; cursor: pointer; }
+        .item-row input { width: auto; margin-right: 8px; }
         
-        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background: #0047a0; color: white; border: none; padding: 15px 30px; cursor: pointer; border-radius: 6px; font-size: 17px; font-weight: bold; width: 100%; }
-        button:hover { background: #003580; }
-        label { font-size: 13px; color: #666; margin-bottom: 5px; display: block; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-pdf { background: #0047a0; color: white; border: none; padding: 15px; cursor: pointer; border-radius: 6px; font-size: 17px; font-weight: bold; flex: 3; }
+        .btn-reset { background: #666; color: white; border: none; padding: 15px; cursor: pointer; border-radius: 6px; font-size: 17px; font-weight: bold; flex: 1; }
+        label { font-size: 13px; color: #555; font-weight: bold; margin-bottom: 5px; display: block; }
+        .disabled-area { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
 
 <div class="input-panel">
-    <h2 style="margin-top:0; color:#0047a0;">🏫 결석신고서 작성 도구</h2>
+    <h2 style="margin-top:0; color:#0047a0;">🏫 광운인공지능고 결석신고서 생성기</h2>
     
     <div class="grid-row">
-        <div><label>학과 선택</label>
+        <div><label>학과</label>
             <select id="in_dept" onchange="update()">
-                <option value="인공지능컴퓨팅과">인공지능컴퓨팅과</option>
-                <option value="전자융합과">전자융합과</option>
-                <option value="AI정보콘텐츠과">AI정보콘텐츠과</option>
-                <option value="네트워크통신과">네트워크통신과</option>
-                <option value="인공지능전기과">인공지능전기과</option>
-                <option value="인공지능소프트웨어과">인공지능소프트웨어과</option>
+                <option value="인공지능컴퓨팅과">인공지능컴퓨팅과</option><option value="전자융합과">전자융합과</option>
+                <option value="AI정보콘텐츠과">AI정보콘텐츠과</option><option value="네트워크통신과" selected>네트워크통신과</option>
+                <option value="인공지능전기과">인공지능전기과</option><option value="인공지능소프트웨어과">인공지능소프트웨어과</option>
             </select>
         </div>
-        <div><label>학년</label><input type="number" id="in_g" value="3" oninput="update()"></div>
-        <div><label>반</label><input type="number" id="in_c" oninput="update()"></div>
-        <div><label>번호</label><input type="number" id="in_n" oninput="update()"></div>
+        <div><label>학년/반/번호</label>
+            <div style="display:flex; gap:2px;">
+                <input type="number" id="in_g" value="3" oninput="update()"><input type="number" id="in_c" placeholder="반" oninput="update()"><input type="number" id="in_n" placeholder="번" oninput="update()">
+            </div>
+        </div>
+        <div><label>학생 성명</label><input type="text" id="in_name" placeholder="학생명" oninput="update()"></div>
+        <div><label>담임교사 성명</label><input type="text" id="in_teacher" oninput="update()"></div>
     </div>
 
     <div class="grid-row">
-        <div><label>성명</label><input type="text" id="in_name" oninput="update()"></div>
-        <div><label>신고 유형</label>
-            <select id="in_type" onchange="update()">
-                <option value="결석">결석</option><option value="지각">지각</option>
-                <option value="조퇴">조퇴</option><option value="결과">결과</option>
+        <div><label>구분/유형</label>
+            <div style="display:flex; gap:2px;">
+                <select id="in_cat" onchange="toggleAckArea(); update();"><option value="질병">질병</option><option value="출석인정">출석인정</option><option value="기타">기타</option></select>
+                <select id="in_type" onchange="update(); updateOpinionOnly();"><option value="결석">결석</option><option value="지각">지각</option><option value="조퇴">조퇴</option><option value="결과">결과</option></select>
+            </div>
+        </div>
+        <div><label>시작 날짜</label><input type="date" id="in_sdate" onchange="handleDateChange();"></div>
+        <div><label>기간(일수)</label><input type="number" id="in_days" value="1" oninput="handleDateChange()"></div>
+        <div><label>종료 날짜</label><input type="date" id="in_edate" onchange="update();"></div>
+    </div>
+
+    <div class="grid-row">
+        <div><label>신고서 제출일</label><input type="date" id="in_submit_date" onchange="update();"></div>
+        <div class="full-row" style="grid-column: span 3;"><label>빠른 사유 선택</label>
+            <select id="in_quick" onchange="setQuickReason()">
+                <option value="">-- 직접입력 --</option>
+                <optgroup label="질병 사유">
+                    <option value="감기(몸살)">감기(몸살)</option>
+                    <option value="복통 및 장염">복통 및 장염</option>
+                </optgroup>
+                <optgroup label="출석인정 사유">
+                    <option value="운동부 수업시간 할애">운동부 수업시간 할애</option>
+                    <option value="생리통">생리통</option>
+                    <option value="취업 면접 참여">취업 면접 참여</option>
+                    <option value="공인 자격증 시험 응시">공인 자격증 시험 응시</option>
+                </optgroup>
             </select>
         </div>
-        <div><label>구분</label>
-            <select id="in_cat" onchange="update()">
-                <option value="질병">질병</option>
-                <option value="출석인정">출석인정</option>
-                <option value="기타">기타</option>
-            </select>
+    </div>
+
+    <div class="full-row" id="ack_input_area">
+        <label>출석 인정 상세 항목 선택 (하나만 선택 가능)</label>
+        <div class="ack-grid">
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="1" value="조사" onchange="update()"> 조사</div>
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="2" value="학생 행사참여" onchange="update()"> 학생 행사참여</div>
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="3" value="대회 참여" onchange="update()"> 대회 참여</div>
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="4" value="체험학습" onchange="update()"> 체험학습</div>
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="5" value="자격증 시험" onchange="update()"> 자격증 시험</div>
+            <div class="item-row"><input type="radio" name="ack_radio" class="ack-rd" data-idx="6" value="면접" onchange="update()"> 면접</div>
+            <div class="item-row" style="grid-column: span 3;"><input type="radio" name="ack_radio" id="rd_ack_etc" onchange="update()"> 기타: <input type="text" id="in_ack_etc" oninput="update()" style="width:70%; margin-left:5px;"></div>
         </div>
-        <div><label>빠른 사유 선택</label>
-            <select id
+    </div>
+    
+    <div class="full-row" style="margin-top:10px;"><label>결석 상세 사유 기재</label><input type="text" id="in_reason" oninput="update(); updateOpinionOnly();"></div>
+
+    <div class="full-row" style="margin-top:15px;">
+        <label>첨부서류 선택</label>
+        <div class="docs-grid">
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="의사소견서" onchange="update()"> 1. 의사소견서</div>
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="진료확인서" onchange="update()"> 2. 진료확인서</div>
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="증빙 서류" onchange="update()"> 3. 증빙 서류</div>
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="학생 참여 행사공문" onchange="update()"> 5. 행사공문</div>
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="운동부 참여 공문" onchange="update()"> 6. 대회공문</div>
+            <div class="item-row"><input type="checkbox" class="doc-chk" value="체험학습 신청서" onchange="update()"> 7. 체험학습서</div>
+            <div class="item-row" style="grid-column: span 3;"><input type="checkbox" id="chk_doc_etc" onchange="update()"> 10. 기타: <input type="text" id="in_doc_etc" oninput="update()" style="width:70%; margin-left:5px;"></div>
+        </div>
+    </div>
+
+    <div class="full-row" style="margin-top:15px;">
+        <label>담임교사 의견</label>
+        <textarea id="in_opinion" rows="2" oninput="update()"></textarea>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-reset" onclick="resetForm()">입력 초기화</button>
+        <button class="btn-pdf" onclick="savePDF()">신고서 PDF 다운로드</button>
+    </div>
+</div>
+
+<div id="form-capture">
+    <div class="title">결석(지각·조퇴·결과)신고서</div>
+    <table>
+        <tr><td colspan="4" style="text-align:left; padding-left:15px; font-weight:normal; height:26px; border-bottom:none;">1. 종류: 해당 칸에 V 하세요.</td></tr>
+        <tr><th width="18%">과</th><td width="32%"><span id="out_dept"></span></td><th width="18%">학년 - 반</th><td width="32%"><span id="out_g"></span>학년 <span id="out_c"></span>반</td></tr>
+        <tr><th>번호</th><td><span id="out_n"></span>번</td><th>성명</th><td><span id="out_name"></span></td></tr>
+    </table>
+
+    <table class="type-matrix" style="margin-top:8px;">
+        <tr><th width="18%">구분</th><th width="27.3%">질병</th><th width="27.3%">출석 인정</th><th width="27.3%">기타</th></tr>
+        <tr><th>결석</th><td id="m_질병_결석"></td><td id="m_출석인정_결석"></td><td id="m_기타_결석"></td></tr>
+        <tr><th>지각</th><td id="m_질병_지각"></td><td id="m_출석인정_지각"></td><td id="m_기타_지각"></td></tr>
+        <tr><th>조퇴</th><td id="m_질병_조퇴"></td><td id="m_출석인정_조퇴"></td><td id="m_기타_조퇴"></td></tr>
+        <tr><th>결과</th><td id="m_질병_결과"></td><td id="m_출석인정_결과"></td><td id="m_기타_결과"></td></tr>
+    </table>
+
+    <div class="check-box-area">
+        <strong>※ 출석 인정 종류 (출석 인정 시에만 체크)</strong><br>
+        <div class="ack-line-1">
+            <span class="ack-item"><span id="s1">□</span> 조사</span>
+            <span class="ack-item"><span id="s2">□</span> 학생 행사참여</span>
+            <span class="ack-item"><span id="s3">□</span> 대회 참여</span>
+            <span class="ack-item"><span id="s4">□</span> 체험학습</span>
+            <span class="ack-item"><span id="s5">□</span> 자격증 시험</span>
+            <span class="ack-item"><span id="s6">□</span> 면접</span>
+        </div>
+        <div class="ack-line-2">
+            <span class="ack-item"><span id="s7">□</span> 기타 : ( <span id="s7_txt" style="font-weight:bold; text-decoration:underline;"></span> )</span>
+        </div>
+    </div>
+
+    <table>
+        <tr><th width="18%">2. 기간</th><td style="text-align:left; padding-left:15px;">2026년 <span id="out_sy"></span>월 <span id="out_sd"></span>일부터 2026년 <span id="out_ey"></span>월 <span id="out_ed"></span>일까지 (<span id="out_days"></span>)일간</td></tr>
+        <tr><th>3. 사유</th><td class="reason-box">위 본인은 ( <strong id="out_reason"></strong> )의 사유로 인하여<br>( <strong id="out_type"></strong> )하였으므로 이에 신고합니다.</td></tr>
+    </table>
+
+    <div style="font-size:10pt; margin-top:8px; text-align:left; line-height:1.4;">
+        ◎ 첨부서류: <span id="out_docs" style="font-weight:bold; font-size:10.5pt; text-decoration:underline;"></span><br>
+        <span style="font-weight:bold; font-size:9pt;">※ 위 첨부서류는 질병 결석 일수가 3일 이상일 경우만 제출.</span>
+    </div>
+
+    <div class="opinion-box">◎ 담임교사 의견란<br><span id="out_opinion" style="line-height:1.4;"></span></div>
+
+    <div style="margin-top:30px; text-align:right; font-size:12pt; line-height:2.4; padding-right:15px;">
+        2026년 &nbsp;<span id="out_sub_m"></span>&nbsp; 월 &nbsp;<span id="out_sub_d"></span>&nbsp; 일<br>
+        학 생 : <span id="out_name_sign" style="display:inline-block; width:120px; border-bottom: 1px dashed #ccc;"></span> (인)<br>
+        담임교사 : <span id="out_teacher_sign" style="display:inline-block; width:120px; border-bottom: 1px dashed #ccc;"></span> (인)
+    </div>
+    <div class="school-name">광운인공지능고등학교장 귀하</div>
+</div>
+
+<script>
+    function toggleAckArea() {
+        const cat = document.getElementById('in_cat').value;
+        const area = document.getElementById('ack_input_area');
+        const radios = area.querySelectorAll('input[type="radio"]');
+        const etcText = document.getElementById('in_ack_etc');
+        
+        if (cat === '출석인정') {
+            area.classList.remove('disabled-area');
+            radios.forEach(r => r.disabled = false);
+            etcText.disabled = false;
+        } else {
+            area.classList.add('disabled-area');
+            radios.forEach(r => { r.disabled = true; r.checked = false; });
+            etcText.disabled = true; etcText.value = "";
+        }
+    }
+
+    // 날짜 자동 계산 핸들러
+    function handleDateChange() {
+        const sDateVal = document.getElementById('in_sdate').value;
+        const days = parseInt(document.getElementById('in_days').value) || 1;
+        
+        if (sDateVal) {
+            const sDate = new Date(sDateVal);
+            const eDate = new Date(sDate);
+            eDate.setDate(sDate.getDate() + days - 1);
+            
+            // 종료 날짜 인풋 세팅
+            document.getElementById('in_edate').value = eDate.toISOString().split('T')[0];
+        }
+        update();
+    }
+
+    function setQuickReason() {
+        const q = document.getElementById('in_quick').value;
+        if(q) {
+            document.getElementById('in_reason').value = q;
+            if(q.includes('면접') || q.includes('자격증') || q.includes('운동부') || q.includes('생리통')) {
+                document.getElementById('in_cat').value = '출석인정';
+                toggleAckArea();
+                
+                if(q.includes('운동부')) {
+                    document.getElementById('rd_ack_etc').checked = true;
+                    document.getElementById('in_ack_etc').value = '운동부 수업시간 할애';
+                }
+                else if(q.includes('생리통')) { 
+                    document.getElementById('rd_ack_etc').checked = true; 
+                    document.getElementById('in_ack_etc').value = '생리통'; 
+                }
+                else if(q.includes('면접')) document.querySelector('.ack-rd[data-idx="6"]').checked = true;
+                else if(q.includes('자격증')) document.querySelector('.ack-rd[data-idx="5"]').checked = true;
+            } else {
+                document.getElementById('in_cat').value = '질병';
+                toggleAckArea();
+            }
+            updateOpinionOnly();
+        }
+        update();
+    }
+
+    function updateOpinionOnly() {
+        const reason = document.getElementById('in_reason').value;
+        const cat = document.getElementById('in_cat').value;
+        const type = document.getElementById('in_type').value;
+        let opinion = "";
+
+        if (cat === '질병') {
+            opinion = `위 학생의 사유인 (${reason})을(를) 확인하였으며 학생, 학부모와 상담 후 치료와 안정을 목적으로 가정에서 휴식하도록 지도하였습니다.`;
+        } else {
+            opinion = `위 학생의 사유인 (${reason})을(를) 확인하였으며 해당 사유로 ${type} 하도록 지도하였습니다.`;
+        }
+        document.getElementById('in_opinion').value = opinion;
+        update();
+    }
+
+    function resetForm() {
+        document.getElementById('in_cat').value = '질병';
+        document.getElementById('in_type').value = '결석';
+        document.getElementById('in_sdate').value = '';
+        document.getElementById('in_edate').value = '';
+        document.getElementById('in_submit_date').value = '';
+        document.getElementById('in_days').value = '1';
+        document.getElementById('in_reason').value = '';
+        document.getElementById('in_quick').value = '';
+        document.getElementById('in_opinion').value = '';
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.doc-chk, #chk_doc_etc').forEach(c => c.checked = false);
+        document.getElementById('in_ack_etc').value = '';
+        document.getElementById('in_doc_etc').value = '';
+        toggleAckArea();
+        update();
+    }
+
+    function update() {
+        const name = document.getElementById('in_name').value;
+        const cat = document.getElementById('in_cat').value;
+        const type = document.getElementById('in_type').value;
+
+        document.getElementById('out_dept').innerText = document.getElementById('in_dept').value;
+        document.getElementById('out_g').innerText = document.getElementById('in_g').value;
+        document.getElementById('out_c').innerText = document.getElementById('in_c').value || "__";
+        document.getElementById('out_n').innerText = document.getElementById('in_n').value || "__";
+        document.getElementById('out_name').innerText = name;
+        document.getElementById('out_name_sign').innerText = name;
+        document.getElementById('out_teacher_sign').innerText = document.getElementById('in_teacher').value;
+        document.getElementById('out_type').innerText = type;
+        document.getElementById('out_reason').innerText = document.getElementById('in_reason').value;
+        document.getElementById('out_opinion').innerText = document.getElementById('in_opinion').value;
+
+        const cols = ['질병', '출석인정', '기타'];
+        const rows = ['결석', '지각', '조퇴', '결과'];
+        cols.forEach(c => rows.forEach(r => document.getElementById(`m_${c}_${r}`).innerText = ''));
+        document.getElementById(`m_${cat}_${type}`).innerText = 'V';
+
+        for(let i=1; i<=7; i++) document.getElementById('s'+i).innerText = '□';
+        document.getElementById('s7_txt').innerText = "";
+        
+        document.querySelectorAll('.ack-rd:checked').forEach(r => {
+            document.getElementById('s'+r.getAttribute('data-idx')).innerText = '■';
+        });
+        if(document.getElementById('rd_ack_etc').checked) {
+            document.getElementById('s7').innerText = '■';
+            document.getElementById('s7_txt').innerText = document.getElementById('in_ack_etc').value;
+        }
+
+        // 기간 날짜 처리
+        const sVal = document.getElementById('in_sdate').value;
+        if(sVal) { 
+            const s = new Date(sVal);
+            document.getElementById('out_sy').innerText = s.getMonth()+1; 
+            document.getElementById('out_sd').innerText = s.getDate();
+        } else {
+            document.getElementById('out_sy').innerText = "__";
+            document.getElementById('out_sd').innerText = "__";
+        }
+
+        const eVal = document.getElementById('in_edate').value;
+        if(eVal) {
+            const e = new Date(eVal);
+            document.getElementById('out_ey').innerText = e.getMonth()+1;
+            document.getElementById('out_ed').innerText = e.getDate();
+        } else {
+            document.getElementById('out_ey').innerText = "__";
+            document.getElementById('out_ed').innerText = "__";
+        }
+
+        // 제출일 처리
+        const subVal = document.getElementById('in_submit_date').value;
+        if(subVal) {
+            const sub = new Date(subVal);
+            document.getElementById('out_sub_m').innerText = sub.getMonth()+1;
+            document.getElementById('out_sub_d').innerText = sub.getDate();
+        } else {
+            document.getElementById('out_sub_m').innerText = "&nbsp;&nbsp;";
+            document.getElementById('out_sub_d').innerText = "&nbsp;&nbsp;";
+        }
+
+        document.getElementById('out_days').innerText = document.getElementById('in_days').value;
+
+        let docs = [];
+        document.querySelectorAll('.doc-chk:checked').forEach(c => docs.push(c.value));
+        if(document.getElementById('chk_doc_etc').checked) docs.push(document.getElementById('in_doc_etc').value);
+        document.getElementById('out_docs').innerText = docs.join(', ');
+    }
+
+    function savePDF() {
+        const element = document.getElementById('form-capture');
+        const name = document.getElementById('in_name').value || "미기입";
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+        const fileName = `결석신고서_${name}_${timestamp}.pdf`;
+
+        html2pdf().from(element).set({
+            margin: 0, filename: fileName,
+            html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).save();
+    }
+    
+    // 초기 세팅: 제출일 오늘 날짜로
+    document.getElementById('in_submit_date').value = new Date().toISOString().split('T')[0];
+    toggleAckArea();
+    update();
+</script>
+</body>
+</html>
